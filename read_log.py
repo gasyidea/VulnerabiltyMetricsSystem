@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os, sys
+import os
 import subprocess
-import datetime, re
+import datetime
 
 # Apache log file
 # log_file = "/var/log/apache2/access.log"
@@ -11,11 +11,19 @@ import datetime, re
 
 # report_folder = "/home/men5gasy/Public/appli/apache_report"
 
-t2 = "access2.log"
-t1 = "access1.log"
+# Copy apache log to space work
+cmd = "copy C:\\ms4w\\Apache\\logs\\access.log C:\\readLog\\current_access.log"
+subprocess.call(cmd, shell=True)
+
+t2 = "current_access.log"
+t1 = "last_access.log"
 
 
 def main():
+
+    # Classif des vulnerabilites
+    classif = ['sqli', 'id', 'xss', 'dom', 'ref', 'lfi', 'dt', 'csrf']
+
     # Generate diffrence between 2 logs
     fileComparateur(t2, t1)
 
@@ -24,7 +32,6 @@ def main():
            'xss,sqli,csrf,dos,dt,spam,id,ref,lfi', '-o', 'report', '--text', '-u']
     subprocess.call(cmd, shell=True)
     # scalp-0.4.py -l /var/log/apache2/access.log -f default_filter.xml -u -p 29/Oct/2016:22:28:16;*/Nov/2016 -a xss,sqli,csrf,dos,dt,spam,id,ref,lfi -o report --xml
-
 
     # Read result txt
     now = datetime.date.today()
@@ -46,9 +53,6 @@ def main():
                     ip_adress.append(temp[0])
                     date_attack.append(temp[3].strip('[]').split('+')[0].strip(' '))
 
-        # Remove report from report direcotry
-        #os.remove(result_name)
-
         # Success Request
         success = GetSuccessfullRequest(result_name)
 
@@ -64,18 +68,42 @@ def main():
         if success[len(success) - 1] > attack_type[nb_attack - 1][1]:
             attack_type[nb_attack - 1][2] = 1
 
-
         # Write result
         result = open('result.txt', 'w')
 
         for i in range(0, nb_attack):
-            text = str(ip_adress[i]).lstrip('\t') + '_' + str(date_attack[i]) + '_' + str(attack_type[i][0]) + '_' + str(attack_type[i][2]) + '_ND@\n'
+
+            id_attack = str(attack_type[i][0])[attack_type[i][0].index('(')+1:attack_type[i][0].index(')')]
+
+            if id_attack in classif:
+                index = 'A' + str(classif.index(id_attack) + 1)
+            else:
+                index = 'ND'
+
+            # Format date
+            d = datetime.datetime.strptime(date_attack[i], '%d/%b/%Y:%H:%M:%S')
+
+            text = str(ip_adress[i]).lstrip('\t') + '_' + str(d.strftime('%d/%m/%Y:%H:%M:%S')) + '_' + id_attack + '_' + str(attack_type[i][2]) + '_' + index + '\n'
             result.write(text)
 
         result.close()
 
+        # Copy to send directory
+        #cmd = "copy result.txt C:\\readLog\\current_access.log"
+        #subprocess.call(cmd, shell=True)
+
+        # Replace last_access by current_access
+        cmd = "copy C:\\readLog\\current_access.log C:\\readLog\\last_access.log"
+        subprocess.call(cmd, shell=True)
+
+        # Remove report from report direcotry
+        os.remove(result_name)
+        os.remove('current_access.log')
+        #os.remove('result.txt')
+
     except IOError:
-        print "Pas d'alerte à signaler"""
+        #print "Pas d'alerte à signaler".decode('utf-8')
+        pass
 
     """# Read result xml
     now = datetime.date.today()
