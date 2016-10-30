@@ -4,13 +4,6 @@ import os
 import subprocess
 import datetime
 
-# Apache log file
-# log_file = "/var/log/apache2/access.log"
-# diff_log = "/home/men5gasy/Public/appli/diff.log"
-# scalp_folder = "/home/men5gasy/Public/appli/scalp"
-
-# report_folder = "/home/men5gasy/Public/appli/apache_report"
-
 # Copy apache log to space work
 cmd = "copy C:\\ms4w\\Apache\\logs\\access.log C:\\readLog\\current_access.log"
 subprocess.call(cmd, shell=True)
@@ -31,7 +24,6 @@ def main():
     cmd = ['python', 'scalp-0.4.py', '-l', 'diff.log', '-f', 'default_filter.xml', '-a',
            'xss,sqli,csrf,dos,dt,spam,id,ref,lfi', '-o', 'report', '--text', '-u']
     subprocess.call(cmd, shell=True)
-    # scalp-0.4.py -l /var/log/apache2/access.log -f default_filter.xml -u -p 29/Oct/2016:22:28:16;*/Nov/2016 -a xss,sqli,csrf,dos,dt,spam,id,ref,lfi -o report --xml
 
     # Read result txt
     now = datetime.date.today()
@@ -102,41 +94,7 @@ def main():
         #os.remove('result.txt')
 
     except IOError:
-        #print "Pas d'alerte à signaler".decode('utf-8')
         pass
-
-    """# Read result xml
-    now = datetime.date.today()
-    result_name = 'report/diff.log_scalp_' + now.strftime('%a-%d-%b-%Y') + '.xml'
-    #print result_name
-
-    # Read Xml, delete header and send infos
-    newXml = open('diff.log_scalp_' + now.strftime('%a-%d-%b-%Y') + '.xml', 'w')
-
-    try:
-        with open(result_name) as f:
-            for i in xrange(4):
-                f.next()
-            for line in f:
-                newXml.write(str(line))
-
-        newXml.close()
-
-        # Remove report from report direcotry
-        os.remove(result_name)
-
-        # Read new xml without header
-
-
-
-
-        #tree = etree.parse()
-        #rootXml = tree.getroot()
-
-
-    except IOError:
-        print "Pas d'alerte à signaler"""
-
 
 # Get line number
 def getLineNumber(file, lookup):
@@ -181,21 +139,3 @@ def fileComparateur(t2, t1):
 
 if __name__ == '__main__':
     main()
-
-"""if temps in open('access2.log').read():
-    f = open('access2.log', 'r+b')
-    mf = mmap.mmap(f.fileno(), 0)
-    mf.seek(0) # reset file cursor
-    m = re.search('pattern', mf)
-    print m.start(), m.end()
-    mf.close()
-    f.close()"""
-
-"""with open('access2.log', 'r') as f1, open('access1.log', 'r') as f2:
-    diff = difflib.ndiff(f1.readlines(), f2.readlines())
-
-    for line in diff:
-        if line.startswith('-'):
-            line_str = str(line)
-            debut = line_str.index('1')
-            print line_str[debut:]"""
