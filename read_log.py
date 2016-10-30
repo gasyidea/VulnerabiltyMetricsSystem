@@ -4,7 +4,7 @@ import os
 import subprocess
 import datetime
 
-# Copy apache log to space work
+# Copy apache log to workspace
 cmd = "copy C:\\ms4w\\Apache\\logs\\access.log C:\\readLog\\current_access.log"
 subprocess.call(cmd, shell=True)
 
@@ -14,18 +14,19 @@ t1 = "last_access.log"
 
 def main():
 
-    # Classif des vulnerabilites
+    # Vulnerability classification
     classif = ['sqli', 'id', 'xss', 'dom', 'ref', 'lfi', 'dt', 'csrf']
 
     # Generate diffrence between 2 logs
     fileComparateur(t2, t1)
 
-    # Audit diffrence to find attacks
+    # Audit diffrences to find attacks
     cmd = ['python', 'scalp-0.4.py', '-l', 'diff.log', '-f', 'default_filter.xml', '-a',
            'xss,sqli,csrf,dos,dt,spam,id,ref,lfi', '-o', 'report', '--text', '-u']
+
     subprocess.call(cmd, shell=True)
 
-    # Read result txt
+    # Read result txt of scalp
     now = datetime.date.today()
     result_name = 'report/diff.log_scalp_' + now.strftime('%a-%d-%b-%Y') + '.txt'
 
@@ -45,7 +46,7 @@ def main():
                     ip_adress.append(temp[0])
                     date_attack.append(temp[3].strip('[]').split('+')[0].strip(' '))
 
-        # Success Request
+        # Successed Requests
         success = GetSuccessfullRequest(result_name)
 
         # Get successed attack
@@ -81,9 +82,8 @@ def main():
         result.close()
 
         # Copy to send directory
-        #cmd = "copy result.txt C:\\readLog\\current_access.log"
+        cmd = "copy result.txt D:\\retros\\result"+ datetime.datetime.now().strftime('%d_%m_%Y_%H_%M_%S')
         #subprocess.call(cmd, shell=True)
-
         # Replace last_access by current_access
         cmd = "copy C:\\readLog\\current_access.log C:\\readLog\\last_access.log"
         subprocess.call(cmd, shell=True)
@@ -96,7 +96,7 @@ def main():
     except IOError:
         pass
 
-# Get line number
+# Get line number in a file
 def getLineNumber(file, lookup):
     with open(file) as myFile:
         for num, line in enumerate(myFile, 1):
@@ -104,7 +104,7 @@ def getLineNumber(file, lookup):
                 return num
 
 
-# Get Success Request
+# Get Successed Requests
 def GetSuccessfullRequest(file):
     SuccessStatut = []
     with open(file) as myFile:
@@ -119,7 +119,7 @@ def GetSuccessfullRequest(file):
     return SuccessStatut
 
 
-# Function for getting diffrence between 2 logs files
+# Function for getting diffrences between 2 logs files
 def fileComparateur(t2, t1):
     file = open('diff.log', 'w')
 
